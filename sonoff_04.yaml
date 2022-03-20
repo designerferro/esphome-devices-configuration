@@ -9,8 +9,8 @@ wifi:
   ssid: !secret wifissid
   password: !secret wifipass
   fast_connect: True
-  ap:
-    ssid: $hostname
+captive_portal:
+logger:
   
 api:
   reboot_timeout: 0s
@@ -18,8 +18,6 @@ api:
 ota:
   safe_mode: True
   password: !secret otapass
-
-logger: 
 
 # Sensors
 text_sensor:

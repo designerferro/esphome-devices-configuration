@@ -9,9 +9,7 @@ wifi:
   ssid: !secret wifissid
   password: !secret wifipass
   domain: .local
-  ap:
-    ssid: $hostname
-
+captive_portal:
 logger:
 
 # Enable Home Assistant API

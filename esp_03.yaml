@@ -10,8 +10,7 @@ wifi:
   password: !secret wifipass
   fast_connect: true
   domain: .local
-  ap:
-    ssid: $hostname
+captive_portal:
 logger:
 
 # Enable Home Assistant API
@@ -29,10 +28,10 @@ text_sensor:
 binary_sensor:
   - platform: status
     name: $hostname Status
-  - platform: gpio
-    pin: D6
-    name: $hostname PIR Sensor
-    device_class: motion
+#  - platform: gpio
+#    pin: D6
+#    name: $hostname PIR Sensor
+#    device_class: motion
 sensor:
   - platform: wifi_signal
     name: $hostname WiFi Signal Sensor

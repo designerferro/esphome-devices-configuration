@@ -1,0 +1,51 @@
+substitutions:
+  hostname: 'shellyduobulb01'
+esphome:
+  name: $hostname
+  platform: ESP8266
+  board: esp01_1m
+  esp8266_restore_from_flash: true
+wifi:
+  ssid: !secret wifissid
+  password: !secret wifipass
+  fast_connect: True
+captive_portal:
+logger: 
+api:
+  reboot_timeout: 0s
+  password: !secret apipass
+ota:
+  safe_mode: True
+  password: !secret otapass
+
+# Sensors
+text_sensor:
+  - platform: version
+    name: $hostname version
+sensor:
+  - platform: wifi_signal
+    name: $hostname WiFi Signal Sensor
+    update_interval: 3600s
+binary_sensor:
+  - platform: status
+    name: $hostname Status
+    internal: true
+light:
+  - platform: cwww
+    name: "$hostname CW"
+    restore_mode: ALWAYS_ON
+    cold_white: output_cw
+    warm_white: output_ww
+    cold_white_color_temperature: 6500 K
+    warm_white_color_temperature: 3000 K
+    effects:
+      - random:
+      - strobe:
+      - flicker:
+output:
+  - platform: esp8266_pwm
+    pin: GPIO4
+    id: output_ww
+  - platform: esp8266_pwm
+    pin: GPIO5
+    id: output_cw

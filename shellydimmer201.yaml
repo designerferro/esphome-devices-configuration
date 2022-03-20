@@ -8,8 +8,8 @@ wifi:
   ssid: !secret wifissid
   password: !secret wifipass
   fast_connect: True
-  ap:
-    ssid: $hostname
+captive_portal:
+    
 api:
   reboot_timeout: 0s
   password: !secret apipass
@@ -38,12 +38,18 @@ sensor:
 external_components:
   - source:
       type: git
-      url: https://github.com/designerferro/esphome.src
-      ref: shelly-dimmer
+      url: https://github.com/rnauber/esphome.git
+      ref: feature/shelly-dimmer
+    refresh: 1min
     components: [ shelly_dimmer ]
 # disable serial, we need this to talk to the co-processor
 logger:
   baud_rate: 0
+
+uart:
+ tx_pin: 1
+ rx_pin: 3
+ baud_rate: 115200
 
 # define a light 
 light:
