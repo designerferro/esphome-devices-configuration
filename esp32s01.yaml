@@ -13,8 +13,8 @@ wifi:
   fast_connect: true
   domain: .local
 captive_portal:
-#logger:
-#  baud_rate: 0
+logger:
+  baud_rate: 0
 #  level: verbose
 web_server:
   port: 80
@@ -36,8 +36,8 @@ switch:
 
 uart:
   id: modbus_serial
-  rx_pin: GPIO03
-  tx_pin: GPIO01
+  rx_pin: GPIO18
+  tx_pin: GPIO19
   baud_rate: 9600
   stop_bits: 1
 
