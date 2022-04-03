@@ -1,5 +1,5 @@
 substitutions:
-  dev: eredes2
+  dev: eredes
   name: esp32s01
 esphome:
   name: $name
@@ -34,12 +34,13 @@ switch:
   - platform: restart
     name: "${dev} ESP Restart"
 
+# TX 19 - RX 18 
 uart:
   id: modbus_serial
   rx_pin: GPIO18
   tx_pin: GPIO19
   baud_rate: 9600
-  stop_bits: 1
+  stop_bits: 2
 
 modbus:
   #flow_control_pin: 5
@@ -75,6 +76,7 @@ sensor:
 
 ### ### ###
 ### Voltage & Current
+# 1,010404UUuuxxxx@i0:10,Tensão,V,Voltage_L1,16 
   - platform: modbus_controller
     name: "${dev} Voltage L1"
     address: 0x006C
