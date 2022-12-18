@@ -1,6 +1,7 @@
 substitutions:
   dev: eredes
   name: esp32s01
+  hostname: eredes
 esphome:
   name: $name
 esp32:
@@ -8,16 +9,31 @@ esp32:
   framework:
     type: arduino
 wifi:
-  ssid: !secret wifissid
-  password: !secret wifipass
-  fast_connect: true
+  use_address: 192.168.3.103
   domain: .local
+  networks:
+    - ssid: !secret wifissid3
+      password: !secret wifipass3
+      manual_ip:
+        static_ip: 192.168.3.103
+        gateway: 192.168.3.1
+        subnet: 255.255.255.0
+    - ssid: !secret wifissid1
+      password: !secret wifipass1
+      manual_ip:
+        static_ip: 192.168.3.103
+        gateway: 192.168.3.1
+        subnet: 255.255.255.0
+    - ssid: !secret wifissid
+      password: !secret wifipass
+
 captive_portal:
 logger:
   baud_rate: 0
 #  level: verbose
 web_server:
   port: 80
+
 # Enable Home Assistant API
 api:
   reboot_timeout: 0s
@@ -34,7 +50,7 @@ switch:
   - platform: restart
     name: "${dev} ESP Restart"
 
-# TX 19 - RX 18 
+# TX 19 - RX 18 - stop_bits 2
 uart:
   id: modbus_serial
   rx_pin: GPIO18
@@ -213,6 +229,15 @@ sensor:
     skip_updates: 2
 ### ### ###
 text_sensor:
+  - platform: version
+    name: $hostname version
+  - platform: wifi_info
+    ip_address:
+      name: $hostname IP Address
+      icon: mdi:ip-network
+    bssid:
+      name: $hostname Connected BSSID
+      icon: mdi:identifier
   - platform: template
     name: "${dev} ESP Clock"
     id: esp_clock

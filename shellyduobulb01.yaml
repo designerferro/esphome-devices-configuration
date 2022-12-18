@@ -5,23 +5,20 @@ esphome:
   platform: ESP8266
   board: esp01_1m
   esp8266_restore_from_flash: true
-wifi:
-  ssid: !secret wifissid
-  password: !secret wifipass
-  fast_connect: True
-captive_portal:
-logger: 
-api:
-  reboot_timeout: 0s
-  password: !secret apipass
-ota:
-  safe_mode: True
-  password: !secret otapass
+
+<<: !include common.yaml
 
 # Sensors
 text_sensor:
   - platform: version
     name: $hostname version
+  - platform: wifi_info
+    ip_address:
+      name: $hostname IP Address
+      icon: mdi:ip-network
+    bssid:
+      name: $hostname Connected BSSID
+      icon: mdi:identifier
 sensor:
   - platform: wifi_signal
     name: $hostname WiFi Signal Sensor

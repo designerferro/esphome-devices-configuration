@@ -5,26 +5,20 @@ esphome:
   name: $hostname
   platform: ESP8266
   board: nodemcuv2
-wifi:
-  ssid: !secret wifissid
-  password: !secret wifipass
-  fast_connect: true
-  domain: .local
-captive_portal:
-logger:
 
-# Enable Home Assistant API
-api:
-  reboot_timeout: 0s
-  password: !secret apipass
-ota:
-  safe_mode: True
-  password: !secret otapass
+<<: !include common.yaml
 
 # Sensors bellow
 text_sensor:
   - platform: version
     name: $hostname version
+  - platform: wifi_info
+    ip_address:
+      name: $hostname IP Address
+      icon: mdi:ip-network
+    bssid:
+      name: $hostname Connected BSSID
+      icon: mdi:identifier
 binary_sensor:
   - platform: status
     name: $hostname Status
@@ -42,7 +36,7 @@ sensor:
     update_interval: 300s
     temperature:
       name: $hostname Temperature
-      unit_of_measurement: 'C'
+      unit_of_measurement: '°C'
       icon: "mdi:thermometer"
       accuracy_decimals: 1
     humidity:
