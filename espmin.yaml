@@ -1,0 +1,25 @@
+substitutions:
+  devicename: espmin
+  ssid: !secret wifissid
+  password: !secret wifipass
+  otapass: !secret otapass
+  apipass: !secret apipass 
+
+esphome:
+  name: ${devicename}
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: ${ssid}
+  password: ${password}
+  power_save_mode: HIGH # for ESP8266 LOW/HIGH are mixed up, esphome/issues/issues/1532
+  manual_ip:
+    static_ip: 192.168.2.131
+    gateway: 192.168.2.1
+    subnet: 255.255.255.0
+    dns1: 8.8.8.8
+    dns2: 8.8.4.4
+api:
+
+ota:

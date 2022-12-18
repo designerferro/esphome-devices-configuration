@@ -1,0 +1,218 @@
+substitutions:
+  devicename: shelly25-roupa
+  channel_1: Open
+  channel_2: Close
+
+  ssid: !secret wifissid
+  password: !secret wifipass
+  otapass: !secret otapass
+  apipass: !secret apipass
+
+  max_power: "200.0"
+  max_temp: "70.0"
+
+esphome:
+  name: ${devicename}
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: ${ssid}
+  password: ${password}
+  power_save_mode: HIGH # for ESP8266 LOW/HIGH are mixed up, esphome/issues/issues/1532
+  manual_ip:
+    static_ip: 192.168.2.35
+    gateway: 192.168.2.1
+    subnet: 255.255.255.0
+    dns1: 8.8.8.8
+    dns2: 8.8.4.4
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: ${devicename}
+    password: ${password}
+    manual_ip:
+      static_ip: 192.168.100.2
+      gateway: 192.168.100.1
+      subnet: 255.255.255.0
+      dns1: 8.8.8.8
+      dns2: 8.8.4.4
+
+captive_portal:
+
+# Enable logging
+logger:
+  level: INFO
+
+# Enable Home Assistant API
+api:
+ password: ${apipass}
+
+ota:
+ password: ${otapass}
+
+web_server:
+  port: 80
+
+time:
+  - platform: sntp
+    id: my_time
+
+i2c:
+  sda: GPIO12
+  scl: GPIO14
+
+sensor:
+  - platform: ade7953
+    irq_pin: GPIO16 # Prevent overheating by setting this
+    voltage:
+      name: ${devicename} voltage
+      internal: true
+      filters:
+        - throttle: 5s
+    # On the Shelly 2.5 channels are mixed ch1=B ch2=A
+    current_a:
+      name: ${channel_2} current
+      id: open_current
+      internal: False
+    current_b:
+      name: ${channel_1} current
+      id: close_current
+      internal: False
+    active_power_a:
+      name: ${channel_2} power
+      id: close_power
+      # active_power_a is normal, so don't multiply by -1
+      on_value_range:
+        - above: ${max_power}
+          then:
+            - switch.turn_off: close_relay
+            - homeassistant.service:
+                service: persistent_notification.create
+                data:
+                  title: Message from ${devicename}
+                data_template:
+                  message: Switch turned off because power exceeded ${max_power}W
+    active_power_b:
+      name: ${channel_1} power
+      id: open_power
+      # active_power_b is inverted, so take the absolute value
+      filters:
+        - lambda: return abs(x);
+      on_value_range:
+        - above: ${max_power}
+          then:
+            - switch.turn_off: open_relay
+            - homeassistant.service:
+                service: persistent_notification.create
+                data:
+                  title: Message from ${devicename}
+                data_template:
+                  message: Switch turned off because power exceeded ${max_power}W
+    update_interval: 0.5s
+
+  - platform: total_daily_energy
+    name: ${channel_1} energy
+    power_id: open_power
+    filters:
+      # Multiplication factor from W to kWh is 0.001
+      - multiply: 0.001
+    unit_of_measurement: kWh
+
+  - platform: total_daily_energy
+    name: ${channel_2} energy
+    power_id: close_power
+    filters:
+      # Multiplication factor from W to kWh is 0.001
+      - multiply: 0.001
+    unit_of_measurement: kWh
+
+  # NTC Temperature
+  - platform: ntc
+    sensor: temp_resistance_reading
+    name: ${devicename} temperature
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    icon: "mdi:thermometer"
+    calibration:
+      b_constant: 3350
+      reference_resistance: 10kOhm
+      reference_temperature: 298.15K
+    on_value_range:
+      - above: ${max_temp}
+        then:
+          - switch.turn_on: _shutdown
+          - homeassistant.service:
+              service: persistent_notification.create
+              data:
+                title: Message from ${devicename}
+              data_template:
+                message: Switch turned off because temperature exceeded ${max_temp}°C
+  - platform: resistance
+    id: temp_resistance_reading
+    sensor: temp_analog_reading
+    configuration: DOWNSTREAM
+    resistor: 32kOhm
+  - platform: adc
+    id: temp_analog_reading
+    pin: A0
+    update_interval: 30s
+    internal: true
+
+status_led:
+  pin:
+    number: GPIO0
+    inverted: yes
+
+switch:
+  - platform: gpio
+    id: open_relay
+    name: ${devicename} open relay
+    pin: GPIO4
+    icon: "mdi:window-shutter-open"
+    restore_mode: RESTORE_DEFAULT_OFF
+    interlock: &interlock [open_relay, close_relay]
+    interlock_wait_time: 200ms
+  - platform: gpio
+    id: close_relay
+    name: ${channel_2} close relay
+    pin: GPIO15
+    icon: "mdi:window-shutter"
+    restore_mode: RESTORE_DEFAULT_OFF
+    interlock: *interlock
+    interlock_wait_time: 200ms
+  - platform: shutdown
+    id: _shutdown
+    name: ${devicename} Shutdown
+
+cover:
+  - platform: time_based
+    id: laundry_shutter
+    name: "Laundry shutter"
+    open_action: 
+      - switch.turn_on: open_relay
+    open_duration: 14s
+    close_action:
+      - switch.turn_on: close_relay
+    close_duration: 14s
+    stop_action:
+      - switch.turn_off: close_relay
+      - switch.turn_off: open_relay
+
+binary_sensor:
+  - platform: gpio
+    id: ${channel_1}_button
+    pin:
+      number: GPIO13
+    name: "${channel_1} button"
+    on_state:
+      then:
+        - switch.toggle: open_relay
+  - platform: gpio
+    id: ${channel_2}_button
+    pin:
+      number: GPIO5
+    name: "${channel_2} button"
+    on_state:
+      then:
+        - switch.toggle: close_relay

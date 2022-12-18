@@ -1,0 +1,21 @@
+# More info at https://esphome.io/guides/configuration-types.html
+# stuff goes here
+# Dont's forget to add the bellow line in every device.
+# <<: !include common.yaml
+
+wifi:
+  ssid: !secret wifissid
+  password: !secret wifipass
+  fast_connect: True
+captive_portal:
+logger:
+  level: INFO
+web_server:
+  port: 80
+  ota: off
+api:
+  reboot_timeout: 0s
+  password: !secret apipass
+ota:
+  safe_mode: True
+  password: !secret otapass
