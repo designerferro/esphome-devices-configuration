@@ -201,18 +201,22 @@ cover:
 
 binary_sensor:
   - platform: gpio
-    id: ${channel_1}_button
     pin:
       number: GPIO13
     name: "${channel_1} button"
-    on_state:
+    on_press:
       then:
-        - switch.toggle: open_relay
+        - cover.open: laundry_shutter
+    on_release:
+      then:
+        - cover.stop: laundry_shutter
   - platform: gpio
-    id: ${channel_2}_button
     pin:
       number: GPIO5
     name: "${channel_2} button"
-    on_state:
+    on_press:
       then:
-        - switch.toggle: close_relay
+        - cover.close: laundry_shutter
+    on_release:
+      then:
+        - cover.stop: laundry_shutter
