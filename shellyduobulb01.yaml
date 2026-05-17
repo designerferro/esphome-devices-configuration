@@ -2,16 +2,34 @@ substitutions:
   hostname: 'shellyduobulb01'
 esphome:
   name: $hostname
-  platform: ESP8266
+ # esp8266_restore_from_flash: true
+
+esp8266:
   board: esp01_1m
-  esp8266_restore_from_flash: true
 
-<<: !include common.yaml
-
+wifi:
+  ssid: !secret wifissid
+  password: !secret wifipass
+  fast_connect: True
+captive_portal:
+logger:
+  level: INFO
+web_server:
+  port: 80
+  ota: off
+api:
+  encryption:
+    key: !secret apikey
+  reboot_timeout: 0s
+ota:
+  platform: esphome
+  password: !secret otapass
+  
 # Sensors
 text_sensor:
   - platform: version
     name: $hostname version
+    hide_timestamp: True
   - platform: wifi_info
     ip_address:
       name: $hostname IP Address

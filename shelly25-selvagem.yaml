@@ -1,5 +1,5 @@
 substitutions:
-  devicename: shelly25-sala
+  devicename: shelly25-selvagem
   channel_1: Open
   channel_2: Close
 
@@ -20,12 +20,12 @@ wifi:
   ssid: ${ssid}
   password: ${password}
   power_save_mode: HIGH # for ESP8266 LOW/HIGH are mixed up, esphome/issues/issues/1532
-  # manual_ip:
-  #  static_ip: 192.168.2.19
-  #  gateway: 192.168.2.1
-  #  subnet: 255.255.255.0
-  #  dns1: 192.168.2.2
-    
+  manual_ip:
+    static_ip: 192.168.2.64
+    gateway: 192.168.2.1
+    subnet: 255.255.255.0
+    dns1: 192.168.2.2
+
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: ${devicename}
@@ -180,7 +180,7 @@ switch:
   - platform: gpio
     id: open_relay
     name: ${devicename} open relay
-    pin: GPIO4
+    pin: GPIO15
     icon: "mdi:window-shutter-open"
     restore_mode: RESTORE_DEFAULT_OFF
     interlock: &interlock [open_relay, close_relay]
@@ -188,7 +188,7 @@ switch:
   - platform: gpio
     id: close_relay
     name: ${channel_2} close relay
-    pin: GPIO15
+    pin: GPIO4
     icon: "mdi:window-shutter"
     restore_mode: RESTORE_DEFAULT_OFF
     interlock: *interlock
@@ -199,38 +199,36 @@ switch:
 
 cover:
   - platform: time_based
-    id: living_room_shutter
-    name: "Living room shutter"
+    id: selvagem_shutter
+    name: "Selvagem shutter"
     open_action: 
       - switch.turn_on: open_relay
-    open_duration: 24s
+    open_duration: 21s
     close_action:
       - switch.turn_on: close_relay
-    close_duration: 22s
+    close_duration: 21s
     stop_action:
       - switch.turn_off: close_relay
       - switch.turn_off: open_relay
 
 binary_sensor:
   - platform: gpio
-    id: ${channel_1}_button
     pin:
-      number: GPIO13
+      number: GPIO5
     name: "${channel_1} button"
     on_press:
       then:
-        - cover.open: living_room_shutter
+        - cover.open: selvagem_shutter
     on_release:
       then:
-        - cover.stop: living_room_shutter
+        - cover.stop: selvagem_shutter
   - platform: gpio
-    id: ${channel_2}_button
     pin:
-      number: GPIO5
+      number: GPIO13
     name: "${channel_2} button"
     on_press:
       then:
-        - cover.close: living_room_shutter
+        - cover.close: selvagem_shutter
     on_release:
       then:
-        - cover.stop: living_room_shutter
+        - cover.stop: selvagem_shutter

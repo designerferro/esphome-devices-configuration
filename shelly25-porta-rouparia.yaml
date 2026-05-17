@@ -6,14 +6,14 @@ substitutions:
   ssid: !secret wifissid
   password: !secret wifipass
   otapass: !secret otapass
-  apipass: !secret apipass
 
   max_power: "200.0"
   max_temp: "70.0"
 
 esphome:
   name: ${devicename}
-  platform: ESP8266
+
+esp8266:
   board: esp01_1m
 
 wifi:
@@ -24,8 +24,7 @@ wifi:
     static_ip: 192.168.2.52
     gateway: 192.168.2.1
     subnet: 255.255.255.0
-    dns1: 8.8.8.8
-    dns2: 8.8.4.4
+    dns1: 192.168.2.2
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -46,10 +45,13 @@ logger:
 
 # Enable Home Assistant API
 api:
- password: ${apipass}
+  encryption:
+    key: !secret apikey
+  reboot_timeout: 0s
 
 ota:
- password: ${otapass}
+  platform: esphome
+  password: ${otapass}
 
 web_server:
   port: 80
@@ -61,9 +63,19 @@ time:
 i2c:
   sda: GPIO12
   scl: GPIO14
-
+text_sensor:
+  - platform: version
+    name: ${devicename} version
+    hide_timestamp: true
+  - platform: wifi_info
+    ip_address:
+      name: ${devicename} IP Address
+      icon: mdi:ip-network
+    bssid:
+      name: ${devicename} Connected BSSID
+      icon: mdi:identifier
 sensor:
-  - platform: ade7953
+  - platform: ade7953_i2c
     irq_pin: GPIO16 # Prevent overheating by setting this
     voltage:
       name: ${devicename} voltage

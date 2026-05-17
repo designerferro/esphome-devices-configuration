@@ -4,26 +4,14 @@ substitutions:
   hostname: eredes
 esphome:
   name: $name
+  friendly_name: "eRedes"
 esp32:
   board: esp32dev
   framework:
     type: arduino
 wifi:
-  use_address: 192.168.3.103
   domain: .local
   networks:
-    - ssid: !secret wifissid3
-      password: !secret wifipass3
-      manual_ip:
-        static_ip: 192.168.3.103
-        gateway: 192.168.3.1
-        subnet: 255.255.255.0
-    - ssid: !secret wifissid1
-      password: !secret wifipass1
-      manual_ip:
-        static_ip: 192.168.3.103
-        gateway: 192.168.3.1
-        subnet: 255.255.255.0
     - ssid: !secret wifissid
       password: !secret wifipass
 
@@ -36,10 +24,11 @@ web_server:
 
 # Enable Home Assistant API
 api:
+  encryption:
+    key: !secret apikey
   reboot_timeout: 0s
-  password: !secret apipass
 ota:
-  safe_mode: True
+  platform: esphome
   password: !secret otapass
 
 time:
@@ -231,6 +220,7 @@ sensor:
 text_sensor:
   - platform: version
     name: $hostname version
+    hide_timestamp: True
   - platform: wifi_info
     ip_address:
       name: $hostname IP Address

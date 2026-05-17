@@ -1,0 +1,96 @@
+esphome:
+    name: haproxy
+    comment: Living room ESP32 controller
+    area: Basement
+    friendly_name: Bluetooth Proxy
+    min_version: 2025.8.0
+    name_add_mac_suffix: true
+
+substitutions:
+  esphome_name: haproxy
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+wifi:
+  ap:
+  ssid: !secret wifissid
+  password: !secret wifipass
+  fast_connect: True
+  manual_ip:
+    static_ip: 192.168.2.167
+    gateway: 192.168.2.1
+    subnet: 255.255.255.0
+# captive_portal:
+logger:
+  level: INFO
+  on_message: 
+    level: INFO
+    then:
+      - text_sensor.template.publish:
+          id: SwitchBot0DF4_Connection_sensor
+          state: !lambda |-
+            return message;
+# No action on proxy is suposed to work because the proxy has no actions
+# and this should go into the proxy since we are not using the client directly.
+# Read the comments and come back https://github.com/esphome/issues/issues/5745#issuecomment-2081496861
+      
+web_server:
+  port: 80
+  ota: False
+api:
+  encryption:
+    key: !secret apikey
+  reboot_timeout: 0s
+ota:
+  platform: esphome
+  password: !secret otapass
+esp32_ble_tracker:
+  scan_parameters:
+    # We currently use the defaults to ensure Bluetooth
+    # can co-exist with WiFi In the future we may be able to
+    # enable the built-in coexistence logic in ESP-IDF
+    active: true
+
+bluetooth_proxy:
+  active: true
+  connection_slots: 3
+
+#ble_client:
+#  - mac_address: DF:60:8E:88:0D:F4
+#    id: SwitchBot0DF4_ble_client
+#    name: "SwitchBot0DF4 ble_client"
+#    auto_connect: True
+
+time:
+  - platform: homeassistant
+sensor:
+  - platform: uptime
+    name: "${esphome_name} - Uptime Sensor"
+  - platform: wifi_signal
+    name: "${esphome_name} - WiFi Signal"
+    update_interval: 60s
+  - platform: ble_rssi
+    name: "SwitchBot0DF4 BLE RSSI"
+    id: SwitchBot0DF4_rssi
+    mac_address: DF:60:8E:88:0D:F4
+text_sensor:
+  - platform: template
+    icon: "mdi:connection"
+    id: SwitchBot0DF4_Connection_sensor
+    name: "SwitchBot0DF4 template Connection sensor"
+
+switch:
+  - platform: restart
+    name: "${esphome_name} restart"
+
+button:
+  - platform: safe_mode
+    id: button_safe_mode
+    name: Safe Mode Boot
+
+  - platform: factory_reset
+    id: factory_reset_btn
+    name: Factory reset
