@@ -4,6 +4,7 @@ substitutions:
 
 esphome:
   name: $hostname
+  build_path: ./build/${hostname}
 
 esp8266:
   board: nodemcuv2

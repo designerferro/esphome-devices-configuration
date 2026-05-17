@@ -5,6 +5,7 @@ substitutions:
 esphome:
   name: $name
   friendly_name: "eRedes"
+  build_path: ./build/${hostname}
 esp32:
   board: esp32dev
   framework:

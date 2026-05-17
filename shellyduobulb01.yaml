@@ -2,6 +2,7 @@ substitutions:
   hostname: 'shellyduobulb01'
 esphome:
   name: $hostname
+  build_path: ./build/${devicename}
  # esp8266_restore_from_flash: true
 
 esp8266:

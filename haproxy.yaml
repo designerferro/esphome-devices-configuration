@@ -5,6 +5,7 @@ esphome:
     friendly_name: Bluetooth Proxy
     min_version: 2025.8.0
     name_add_mac_suffix: true
+    build_path: ./build/${hostname}
 
 substitutions:
   esphome_name: haproxy
